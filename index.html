@@ -8,121 +8,104 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400&display=swap" rel="stylesheet">
   <style>
-    :root { --sz: 422px; }
-    @media (min-width: 1440px) { :root { --sz: 576px; } }
-    @media (max-width: 480px)  { :root { --sz: 322px; } }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       width: 100%; height: 100%;
       background: #101010;
       display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-      font-family: 'Geist Mono', monospace;
-      transition: background 0.35s;
+      font-family: 'Geist Mono', 'Menlo', monospace;
+      transition: background 0.4s;
     }
     body.light { background: #fafafa; }
 
-    /* ── Frame ── */
+    /* transparent frame — bg comes from the page */
     #frame {
-      width: var(--sz);
-      background: #181818;
-      border-radius: 12px;
+      width: 422px;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      transition: background 0.35s;
     }
-    body.light #frame { background: #f0efed; }
 
-    /* ── Chart canvas ── */
     #c {
       display: block;
-      width: var(--sz);
+      width: 422px;
       height: 200px;
+      cursor: crosshair;
     }
 
-    /* ── Details ── */
     #details {
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      padding: 16px 20px 20px;
+      gap: 10px;
+      padding: 12px 24px 0;
     }
 
-    /* Price row */
-    #price-row {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
+    /* ── Price row ── */
+    #price-row { display: flex; align-items: baseline; gap: 8px; }
+
     #priceVal {
-      font-size: 22px;
-      font-weight: 400;
+      font-size: 20px; font-weight: 400;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.02em;
-      color: rgba(255,255,255,0.88);
-      transition: color 0.35s;
+      letter-spacing: -0.03em;
+      color: rgba(255,255,255,0.90);
+      transition: color 0.4s;
     }
-    body.light #priceVal { color: rgba(0,0,0,0.82); }
+    body.light #priceVal { color: rgba(0,0,0,0.85); }
 
     #changeBadge {
       font-size: 10px; font-weight: 300;
-      padding: 2px 6px; border-radius: 4px; border: 1px solid transparent;
-      letter-spacing: 0.02em;
+      padding: 2px 6px; border-radius: 4px;
+      border: 1px solid transparent; letter-spacing: 0.02em;
     }
-    #changeBadge.up { color: #22c55e; border-color: rgba(34,197,94,0.22); background: rgba(34,197,94,0.08); }
-    #changeBadge.dn { color: #ef4444; border-color: rgba(239,68,68,0.22);  background: rgba(239,68,68,0.08); }
+    #changeBadge.up { color: #22c55e; border-color: rgba(34,197,94,0.20); background: rgba(34,197,94,0.07); }
+    #changeBadge.dn { color: #ef4444; border-color: rgba(239,68,68,0.20);  background: rgba(239,68,68,0.07); }
 
-    /* Range row */
-    #range-row { display: flex; gap: 2px; }
+    /* ── Range row ── */
+    #range-row { display: flex; gap: 1px; }
     .rp {
-      padding: 3px 9px; border-radius: 20px;
-      font-family: 'Geist Mono', monospace;
-      font-size: 9px; font-weight: 300; letter-spacing: 0.07em; text-transform: uppercase;
-      color: rgba(255,255,255,0.20); background: transparent; border: 1px solid transparent;
-      cursor: pointer; transition: all 0.15s;
+      padding: 3px 8px; border-radius: 20px;
+      font-family: inherit; font-size: 9px; font-weight: 300;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: rgba(255,255,255,0.18); background: transparent;
+      border: 1px solid transparent; cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
     }
-    .rp:hover { color: rgba(255,255,255,0.48); }
-    .rp.on    { color: #F7931A; border-color: rgba(247,147,26,0.25); background: rgba(247,147,26,0.07); }
+    .rp:hover { color: rgba(255,255,255,0.45); }
+    .rp.on    { color: #F7931A; border-color: rgba(247,147,26,0.22); background: rgba(247,147,26,0.06); }
 
-    body.light .rp       { color: rgba(0,0,0,0.26); }
-    body.light .rp:hover { color: rgba(0,0,0,0.52); }
-    body.light .rp.on    { color: #c96800; border-color: rgba(201,104,0,0.28); background: rgba(201,104,0,0.07); }
+    body.light .rp       { color: rgba(0,0,0,0.24); }
+    body.light .rp:hover { color: rgba(0,0,0,0.50); }
+    body.light .rp.on    { color: #c96800; border-color: rgba(201,104,0,0.25); background: rgba(201,104,0,0.06); }
 
-    /* Controls row */
-    #controls-row { display: flex; align-items: center; }
-    .toggle {
-      position: relative; display: inline-block;
-      width: 26px; height: 14px; cursor: pointer;
-    }
+    /* ── Toggle ── */
+    #controls-row { display: flex; }
+    .toggle { position: relative; display: inline-block; width: 26px; height: 14px; cursor: pointer; }
     .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
     .knob {
-      position: absolute; inset: 0;
-      background: rgba(255,255,255,0.08); border-radius: 7px; transition: background 0.2s;
+      position: absolute; inset: 0; border-radius: 7px;
+      background: rgba(255,255,255,0.08); transition: background 0.2s;
     }
     .knob::before {
       content: ''; position: absolute;
-      width: 10px; height: 10px; left: 2px; top: 2px;
-      background: rgba(255,255,255,0.22); border-radius: 50%;
+      width: 10px; height: 10px; left: 2px; top: 2px; border-radius: 50%;
+      background: rgba(255,255,255,0.22);
       transition: transform 0.18s, background 0.18s;
     }
-    .toggle input:checked + .knob { background: rgba(255,255,255,0.18); }
+    .toggle input:checked + .knob { background: rgba(255,255,255,0.16); }
     .toggle input:checked + .knob::before { transform: translateX(12px); background: rgba(255,255,255,0.70); }
-    body.light .knob             { background: rgba(0,0,0,0.10); }
-    body.light .knob::before     { background: rgba(0,0,0,0.26); }
-    body.light .toggle input:checked + .knob            { background: rgba(0,0,0,0.16); }
-    body.light .toggle input:checked + .knob::before    { background: rgba(0,0,0,0.68); }
+    body.light .knob           { background: rgba(0,0,0,0.09); }
+    body.light .knob::before   { background: rgba(0,0,0,0.24); }
+    body.light .toggle input:checked + .knob          { background: rgba(0,0,0,0.14); }
+    body.light .toggle input:checked + .knob::before  { background: rgba(0,0,0,0.68); }
 
-    /* Tooltip */
+    /* ── Tooltip ── */
     #tip {
-      position: fixed; pointer-events: none;
-      padding: 3px 8px; border-radius: 4px;
-      font-size: 10px; font-family: 'Geist Mono', monospace; letter-spacing: 0.03em;
-      white-space: nowrap; opacity: 0; transition: opacity 0.08s;
+      position: fixed; pointer-events: none; z-index: 10;
+      padding: 4px 8px; border-radius: 5px;
+      font-family: inherit; font-size: 10px; letter-spacing: 0.02em;
+      white-space: nowrap; opacity: 0;
+      transition: opacity 0.06s;
       transform: translateX(-50%);
-      z-index: 10;
     }
   </style>
 </head>
@@ -135,350 +118,394 @@
         <span id="changeBadge" class="up">—</span>
       </div>
       <div id="range-row">
-        <button class="rp on" data-d="12h">12H</button>
-        <button class="rp" data-d="1">1D</button>
-        <button class="rp" data-d="7">1W</button>
-        <button class="rp" data-d="30">1M</button>
-        <button class="rp" data-d="90">3M</button>
-        <button class="rp" data-d="365">1Y</button>
-        <button class="rp" data-d="max">All</button>
+        <button class="rp on" data-r="12h">12H</button>
+        <button class="rp" data-r="1">1D</button>
+        <button class="rp" data-r="7">1W</button>
+        <button class="rp" data-r="30">1M</button>
+        <button class="rp" data-r="90">3M</button>
+        <button class="rp" data-r="365">1Y</button>
+        <button class="rp" data-r="max">All</button>
       </div>
       <div id="controls-row">
-        <label class="toggle"><input type="checkbox" id="mode-switch"><span class="knob"></span></label>
+        <label class="toggle"><input type="checkbox" id="sw"><span class="knob"></span></label>
       </div>
     </div>
   </div>
   <div id="tip"></div>
 
 <script>
-  // ── Canvas setup ──────────────────────────────────────────────────────────
-  const C_W = 422, C_H = 200;
-  const DPR = window.devicePixelRatio || 1;
-  const canvas = document.getElementById('c');
-  const ctx    = canvas.getContext('2d');
-  canvas.width  = C_W * DPR;
-  canvas.height = C_H * DPR;
+  // ─── Canvas init (DPR-aware, scale once) ──────────────────────────────────
+  const CW = 422, CH = 200;
+  const DPR = Math.min(window.devicePixelRatio || 1, 3);
+  const cv  = document.getElementById('c');
+  const cx  = cv.getContext('2d');
+  cv.width  = CW * DPR;
+  cv.height = CH * DPR;
+  cx.scale(DPR, DPR);  // scale once — coordinates stay in CSS pixels
 
-  const priceValEl  = document.getElementById('priceVal');
-  const changeBadge = document.getElementById('changeBadge');
-  const modeSwitch  = document.getElementById('mode-switch');
-  const tipEl       = document.getElementById('tip');
+  const priceEl = document.getElementById('priceVal');
+  const badgeEl = document.getElementById('changeBadge');
+  const sw      = document.getElementById('sw');
+  const tipEl   = document.getElementById('tip');
 
-  // ── Dark / light ─────────────────────────────────────────────────────────
-  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  if (prefersLight) { document.body.classList.add('light'); modeSwitch.checked = true; }
-  modeSwitch.addEventListener('change', e => {
-    document.body.classList.toggle('light', e.target.checked);
-    if (chartData.length) draw(animProg);
-  });
+  // ─── Theme ────────────────────────────────────────────────────────────────
   const isLight = () => document.body.classList.contains('light');
+  if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+    document.body.classList.add('light'); sw.checked = true;
+  }
+  sw.addEventListener('change', e => {
+    document.body.classList.toggle('light', e.target.checked);
+    redraw();
+  });
 
-  // ── Palette ───────────────────────────────────────────────────────────────
   function pal() {
-    const l = isLight();
+    const L = isLight();
     return {
-      bg:       l ? '#f0efed'                  : '#181818',
-      line:     l ? '#E07510'                  : '#F7931A',
-      lineBear: l ? 'rgba(210,55,55,0.80)'     : 'rgba(239,68,68,0.85)',
-      fill0:    l ? 'rgba(224,117,16,0.10)'    : 'rgba(247,147,26,0.10)',
-      fill1:    'rgba(247,147,26,0)',
-      cross:    l ? 'rgba(0,0,0,0.10)'         : 'rgba(255,255,255,0.10)',
-      halvLine: 'rgba(247,147,26,0.12)',
-      halvText: 'rgba(247,147,26,0.32)',
-      tipBg:    l ? 'rgba(230,228,224,0.96)'   : 'rgba(32,32,32,0.94)',
-      tipBrd:   l ? 'rgba(0,0,0,0.07)'         : 'rgba(255,255,255,0.07)',
-      tipTxt:   l ? 'rgba(0,0,0,0.70)'         : 'rgba(255,255,255,0.70)',
+      bg:       L ? '#fafafa'              : '#101010',
+      line:     L ? '#E07510'              : '#F7931A',
+      glow:     L ? 'rgba(224,117,16,.36)' : 'rgba(247,147,26,.38)',
+      fill0:    L ? 'rgba(224,117,16,.06)' : 'rgba(247,147,26,.07)',
+      hair:     L ? 'rgba(0,0,0,.07)'      : 'rgba(255,255,255,.08)',
+      halvLine: L ? 'rgba(200,100,0,.12)'  : 'rgba(247,147,26,.10)',
+      halvTxt:  L ? 'rgba(200,100,0,.28)'  : 'rgba(247,147,26,.26)',
+      tipBg:    L ? 'rgba(236,234,230,.97)': 'rgba(18,18,18,.96)',
+      tipBrd:   L ? 'rgba(0,0,0,.07)'      : 'rgba(255,255,255,.07)',
+      tipTxt:   L ? 'rgba(0,0,0,.70)'      : 'rgba(255,255,255,.70)',
     };
   }
 
-  // ── Halvings ──────────────────────────────────────────────────────────────
+  // ─── Halvings ─────────────────────────────────────────────────────────────
   const HALVINGS = [
-    Date.UTC(2012, 10, 28), Date.UTC(2016, 6, 9),
-    Date.UTC(2020, 4, 11),  Date.UTC(2024, 3, 19),
+    Date.UTC(2012,10,28), Date.UTC(2016,6,9),
+    Date.UTC(2020,4,11),  Date.UTC(2024,3,19),
   ];
 
-  // ── Chart padding ─────────────────────────────────────────────────────────
-  const PL = 48, PR = 48, PT = 18, PB = 18;
+  const PL = 24, PR = 24, PT = 14, PB = 18;
 
-  // ── State ─────────────────────────────────────────────────────────────────
-  let chartData    = [];
-  let currentRange = '12h';
+  // ─── State ────────────────────────────────────────────────────────────────
+  let data         = [];
+  let range        = '12h';
   let hoverI       = null;
-  let animProg     = 0;
-  let animStart    = null;
-  let isIntro      = true;
-  let isReady      = false;
-  let prevRawPrice = null;
-  let dispPrice    = null;
-  let lastNow      = performance.now();
+  let prog         = 0;
+  let t0           = null;
+  let intro        = true;
+  let ready        = false;
+  let liveRaw      = null;
+  let dispP        = null;
+  let tLast        = performance.now();
+  let lerpLo       = null;
+  let lerpHi       = null;
+  let liveT        = 0;
 
-  const INTRO_DUR = 4800;
+  const DUR = 4800;  // intro duration ms
 
-  // ── Fritsch-Carlson monotone spline ───────────────────────────────────────
-  function getTangents(pts) {
+  // ─── Monotone spline (Fritsch-Carlson) ────────────────────────────────────
+  function tangents(pts) {
     const n = pts.length;
     if (n < 2) return new Array(n).fill(0);
-    const m = new Array(n).fill(0);
-    const d = [];
+    const m = new Array(n).fill(0), d = [];
     for (let i = 0; i < n-1; i++) {
       const dx = pts[i+1].x - pts[i].x;
       d[i] = dx ? (pts[i+1].y - pts[i].y) / dx : 0;
     }
     m[0] = d[0]; m[n-1] = d[n-2];
     for (let i = 1; i < n-1; i++)
-      m[i] = d[i-1] * d[i] <= 0 ? 0 : (d[i-1] + d[i]) / 2;
+      m[i] = d[i-1]*d[i] <= 0 ? 0 : (d[i-1]+d[i])/2;
     for (let i = 0; i < n-1; i++) {
-      if (Math.abs(d[i]) < 1e-10) { m[i] = m[i+1] = 0; continue; }
-      const a = m[i]/d[i], b = m[i+1]/d[i], h = Math.sqrt(a*a + b*b);
+      if (Math.abs(d[i]) < 1e-12) { m[i] = m[i+1] = 0; continue; }
+      const a = m[i]/d[i], b = m[i+1]/d[i], h = Math.sqrt(a*a+b*b);
       if (h > 3) { const s = 3/h; m[i] = s*a*d[i]; m[i+1] = s*b*d[i]; }
     }
     return m;
   }
 
-  function splinePath(pts, tan) {
+  function spline(pts, m) {
     if (pts.length < 2) return;
-    ctx.moveTo(pts[0].x, pts[0].y);
+    cx.moveTo(pts[0].x, pts[0].y);
     for (let i = 0; i < pts.length-1; i++) {
       const h = pts[i+1].x - pts[i].x;
-      ctx.bezierCurveTo(
-        pts[i].x   + h/3, pts[i].y   + tan[i]   * h/3,
-        pts[i+1].x - h/3, pts[i+1].y - tan[i+1] * h/3,
+      cx.bezierCurveTo(
+        pts[i].x   + h/3, pts[i].y   + m[i]   * h/3,
+        pts[i+1].x - h/3, pts[i+1].y - m[i+1] * h/3,
         pts[i+1].x, pts[i+1].y
       );
     }
   }
 
-  // ── Map ───────────────────────────────────────────────────────────────────
-  function makeMap(data) {
-    const prices = data.map(d => d.price);
-    const minP   = Math.min(...prices);
-    const maxP   = Math.max(...prices);
-    const span   = maxP - minP || 1;
-    const N      = data.length;
-    const plotW  = C_W - PL - PR;
-    const plotH  = C_H - PT - PB;
+  // ─── Map (uses lerped Y bounds) ───────────────────────────────────────────
+  function map() {
+    const pW = CW - PL - PR, pH = CH - PT - PB;
+    const N  = data.length;
+    const sp = (lerpHi - lerpLo) || 1;
     return {
       N,
-      px: i => PL + (i / (N-1)) * plotW,
-      py: p => PT + plotH * (1 - (p - minP) / span),
-      minP, maxP,
+      x: i  => PL + (i / (N-1)) * pW,
+      y: pr => PT + pH * (1 - (pr - lerpLo) / sp),
     };
   }
 
-  // ── Intro easing: smooth-start, mostly linear ─────────────────────────────
+  // ─── Easing: fast-start → linear body → soft settle ──────────────────────
   function ease(t) {
-    return t < 0.06 ? (t/0.06) * (t/0.06) * 0.06 : t;
+    if (t < 0.07) return (t/0.07)*(t/0.07)*0.07;
+    if (t > 0.94) { const u=(t-0.94)/0.06; return 0.94+0.06*(1-(1-u)*(1-u)); }
+    return t;
   }
 
-  // ── Draw ──────────────────────────────────────────────────────────────────
-  function draw(progress) {
-    const p = pal();
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.clearRect(0, 0, C_W, C_H);
-    ctx.fillStyle = p.bg;
-    ctx.fillRect(0, 0, C_W, C_H);
+  // ─── Date label ───────────────────────────────────────────────────────────
+  const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function label(ts) {
+    const d=new Date(ts), diff=Date.now()-ts;
+    if (diff < 86400000) {
+      const h=d.getHours(), mn=d.getMinutes().toString().padStart(2,'0');
+      return (h%12||12)+':'+mn+(h<12?' am':' pm');
+    }
+    return MO[d.getMonth()]+' '+d.getDate();
+  }
 
-    if (!chartData.length) return;
+  // ─── Draw ─────────────────────────────────────────────────────────────────
+  function redraw() { if (data.length && lerpLo!==null) draw(prog); }
 
-    const { px, py, minP, N } = makeMap(chartData);
-    const prices = chartData.map(d => d.price);
-    const visN   = Math.max(2, Math.ceil(N * Math.min(1, progress)));
-    const isBull = prices[N-1] >= prices[0];
+  function draw(p) {
+    if (lerpLo === null) return;
+    const pl = pal();
+    cx.clearRect(0, 0, CW, CH);
+    cx.fillStyle = pl.bg;
+    cx.fillRect(0, 0, CW, CH);
+    if (!data.length) return;
+
+    const m     = map();
+    const N     = m.N;
+    const px    = data.map(d=>d.price);
+    const visN  = Math.max(2, Math.ceil(N * Math.min(1, p)));
+    const bull  = px[N-1] >= px[0];
+    const lc    = bull ? pl.line : (isLight() ? '#c43a3a' : '#ef4444');
+    const gc    = bull ? pl.glow : (isLight() ? 'rgba(196,58,58,.32)' : 'rgba(239,68,68,.34)');
+    const f0    = bull ? pl.fill0 : (isLight() ? 'rgba(196,58,58,.05)' : 'rgba(239,68,68,.06)');
 
     const pts = [];
-    for (let i = 0; i < visN; i++) pts.push({ x: px(i), y: py(prices[i]) });
-    const tan = getTangents(pts);
+    for (let i = 0; i < visN; i++) pts.push({ x: m.x(i), y: m.y(px[i]) });
+    const tan = tangents(pts);
 
-    // Fill
-    const floorY = py(minP);
-    const grad   = ctx.createLinearGradient(0, PT, 0, floorY);
-    grad.addColorStop(0, p.fill0);
-    grad.addColorStop(1, p.fill1);
-    ctx.save();
-    ctx.beginPath();
-    splinePath(pts, tan);
-    ctx.lineTo(pts[pts.length-1].x, floorY);
-    ctx.lineTo(pts[0].x, floorY);
-    ctx.closePath();
-    ctx.fillStyle = grad;
-    ctx.fill();
-    ctx.restore();
+    // Gradient fill
+    const floorY = m.y(lerpLo), topY = m.y(lerpHi);
+    const grad = cx.createLinearGradient(0, topY, 0, floorY);
+    grad.addColorStop(0, f0);
+    grad.addColorStop(0.7, 'rgba(0,0,0,0)');
+    cx.save();
+    cx.beginPath();
+    spline(pts, tan);
+    cx.lineTo(pts[pts.length-1].x, floorY);
+    cx.lineTo(pts[0].x, floorY);
+    cx.closePath();
+    cx.fillStyle = grad;
+    cx.fill();
+    cx.restore();
 
-    // Halving markers (longer ranges only)
-    if (progress >= 0.99 && N > 1) {
-      const minTs = chartData[0].ts, maxTs = chartData[N-1].ts;
+    // Halving markers (only for ranges ≥ 180 days)
+    const daySpan = (data[N-1].ts - data[0].ts) / 86400000;
+    if (p >= 0.99 && daySpan >= 180) {
+      const minTs = data[0].ts, maxTs = data[N-1].ts;
       HALVINGS.forEach(ts => {
         if (ts <= minTs || ts >= maxTs) return;
-        const hvX = PL + ((ts - minTs) / (maxTs - minTs)) * (C_W - PL - PR);
-        ctx.save();
-        ctx.beginPath(); ctx.moveTo(hvX, PT + 10); ctx.lineTo(hvX, C_H - PB);
-        ctx.strokeStyle = p.halvLine; ctx.lineWidth = 1; ctx.setLineDash([2, 5]);
-        ctx.stroke(); ctx.restore();
-        ctx.save();
-        ctx.font = '8px Geist Mono, monospace';
-        ctx.fillStyle = p.halvText; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-        ctx.fillText('₿', hvX, PT + 1); ctx.restore();
+        const hx = PL + ((ts-minTs)/(maxTs-minTs))*(CW-PL-PR);
+        cx.save();
+        cx.beginPath(); cx.moveTo(hx, PT+6); cx.lineTo(hx, CH-PB);
+        cx.strokeStyle=pl.halvLine; cx.lineWidth=1; cx.setLineDash([2,5]);
+        cx.stroke(); cx.restore();
+        cx.save();
+        cx.font='7px Geist Mono,monospace';
+        cx.fillStyle=pl.halvTxt; cx.textAlign='center'; cx.textBaseline='top';
+        cx.fillText('₿', hx, PT+1); cx.restore();
       });
     }
 
-    // Line
-    ctx.save();
-    ctx.beginPath();
-    splinePath(pts, tan);
-    ctx.strokeStyle = isBull ? p.line : p.lineBear;
-    ctx.lineWidth = 1.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.stroke();
-    ctx.restore();
+    // ── Line: glow pass → crisp pass ─────────────────────────────────────
+    // Pass 1 — bloom
+    cx.save();
+    cx.beginPath(); spline(pts, tan);
+    cx.strokeStyle = lc;
+    cx.lineWidth = 1.2;
+    cx.lineJoin = 'round'; cx.lineCap = 'round';
+    cx.shadowBlur = 9; cx.shadowColor = gc;
+    cx.stroke(); cx.restore();
 
-    // Crosshair
-    if (!isIntro && hoverI !== null && hoverI < N) {
-      const x = px(hoverI);
-      ctx.save();
-      ctx.beginPath(); ctx.moveTo(x, PT); ctx.lineTo(x, C_H - PB);
-      ctx.strokeStyle = p.cross; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
-      ctx.stroke(); ctx.restore();
+    // Pass 2 — crisp edge
+    cx.save();
+    cx.beginPath(); spline(pts, tan);
+    cx.strokeStyle = lc;
+    cx.lineWidth = 1.2;
+    cx.lineJoin = 'round'; cx.lineCap = 'round';
+    cx.stroke(); cx.restore();
 
-      const d   = chartData[hoverI];
-      const cx  = Math.max(PL + 30, Math.min(C_W - PR - 30, x));
-      const rect = canvas.getBoundingClientRect();
-      tipEl.style.left    = (rect.left + cx * (rect.width / C_W)) + 'px';
-      tipEl.style.top     = (rect.top  + py(d.price) * (rect.height / C_H) - 30) + 'px';
-      tipEl.textContent   = '$' + d.price.toLocaleString('en-US', { maximumFractionDigits: 0 });
-      tipEl.style.background = p.tipBg;
-      tipEl.style.border     = '1px solid ' + p.tipBrd;
-      tipEl.style.color      = p.tipTxt;
+    // ── Live pulse at tip ─────────────────────────────────────────────────
+    if (!intro && p >= 1 && hoverI === null) {
+      const tx = pts[pts.length-1].x, ty = pts[pts.length-1].y;
+      const pulse = 0.5 + 0.5*Math.sin(liveT * Math.PI * 2 / 1.8);
+      cx.save();
+      cx.beginPath(); cx.arc(tx, ty, 2.6, 0, Math.PI*2);
+      cx.fillStyle = lc; cx.globalAlpha = 0.3 + 0.6*pulse;
+      cx.fill(); cx.restore();
+    }
+
+    // ── Crosshair ─────────────────────────────────────────────────────────
+    if (!intro && hoverI !== null && hoverI < N) {
+      const hx = m.x(hoverI), hy = m.y(px[hoverI]);
+
+      cx.save();
+      cx.beginPath(); cx.moveTo(hx, PT); cx.lineTo(hx, CH-PB);
+      cx.strokeStyle=pl.hair; cx.lineWidth=1; cx.setLineDash([2,4]);
+      cx.stroke(); cx.restore();
+
+      // 3-layer dot: outer halo / ring / center
+      cx.save();
+      cx.beginPath(); cx.arc(hx, hy, 5.5, 0, Math.PI*2);
+      cx.fillStyle=gc; cx.fill();
+      cx.beginPath(); cx.arc(hx, hy, 3, 0, Math.PI*2);
+      cx.fillStyle=lc; cx.fill();
+      cx.beginPath(); cx.arc(hx, hy, 1.3, 0, Math.PI*2);
+      cx.fillStyle=pl.bg; cx.fill();
+      cx.restore();
+
+      // Tooltip
+      const d   = data[hoverI];
+      const txt = label(d.ts) + '  ·  $' + d.price.toLocaleString('en-US',{maximumFractionDigits:0});
+      const cx2 = Math.max(PL+44, Math.min(CW-PR-44, hx));
+      const rct = cv.getBoundingClientRect();
+      const sx  = rct.width/CW, sy = rct.height/CH;
+      tipEl.textContent   = txt;
+      tipEl.style.left    = rct.left + cx2*sx + 'px';
+      tipEl.style.top     = rct.top  + (hy-30)*sy + 'px';
+      tipEl.style.background = pl.tipBg;
+      tipEl.style.border     = '1px solid '+pl.tipBrd;
+      tipEl.style.color      = pl.tipTxt;
       tipEl.style.opacity    = '1';
-    } else {
+    } else if (!intro) {
       tipEl.style.opacity = '0';
     }
   }
 
-  // ── Main loop ─────────────────────────────────────────────────────────────
+  // ─── Loop ─────────────────────────────────────────────────────────────────
   function loop(now) {
-    const dt = Math.min((now - lastNow) / 1000, 0.05);
-    lastNow = now;
+    const dt = Math.min((now-tLast)/1000, 0.05);
+    tLast = now;
 
-    if (isReady) {
-      if (!animStart) animStart = now;
-      const rawT = Math.min(1, (now - animStart) / INTRO_DUR);
-      animProg   = ease(rawT);
+    if (ready && data.length) {
+      const prices = data.map(d=>d.price);
+      const lo = Math.min(...prices), hi = Math.max(...prices);
 
-      // Tick price up during intro to match visible chart tip
-      if (isIntro && chartData.length) {
-        const vi = Math.min(chartData.length-1, Math.floor(animProg * (chartData.length-1)));
-        priceValEl.textContent = '$' + Math.round(chartData[vi].price).toLocaleString('en-US');
+      if (lerpLo === null) { lerpLo=lo; lerpHi=hi; }
+      else if (!intro) {
+        const k = Math.min(1, dt*60*0.045);
+        lerpLo += (lo-lerpLo)*k; lerpHi += (hi-lerpHi)*k;
       }
 
-      draw(animProg);
+      if (!t0) t0 = now;
+      const rawT = Math.min(1, (now-t0)/DUR);
+      prog = ease(rawT);
 
-      if (rawT >= 1 && isIntro) {
-        isIntro = false;
-        animatePrice(prevRawPrice);
+      if (intro) {
+        const vi = Math.min(data.length-1, Math.floor(prog*(data.length-1)));
+        priceEl.textContent = '$'+Math.round(data[vi].price).toLocaleString('en-US');
       }
-    } else {
-      // Blank bg while fetching
-      const p = pal();
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, C_W, C_H);
+
+      draw(prog);
+
+      if (rawT >= 1 && intro) {
+        intro = false;
+        animPrice(liveRaw);
+      }
+      if (!intro) liveT += dt;
+
+    } else if (!ready) {
+      const pl = pal();
+      cx.clearRect(0,0,CW,CH);
+      cx.fillStyle = pl.bg;
+      cx.fillRect(0,0,CW,CH);
     }
 
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 
-  // ── Price counter ─────────────────────────────────────────────────────────
-  function animatePrice(to) {
-    if (to === null) return;
-    const from = dispPrice || to;
-    const t0   = performance.now(), dur = 550;
-    (function roll(now) {
-      const t = Math.min(1, (now - t0) / dur);
-      const e = t < 0.5 ? 2*t*t : -1 + (4-2*t)*t;
-      dispPrice = from + (to - from) * e;
-      priceValEl.textContent = '$' + Math.round(dispPrice).toLocaleString('en-US');
-      if (t < 1) requestAnimationFrame(roll);
-    })(t0);
+  // ─── Animated price counter ───────────────────────────────────────────────
+  function animPrice(to) {
+    if (to===null) return;
+    const from=dispP||to, s=performance.now(), dur=500;
+    (function tick(now) {
+      const t=Math.min(1,(now-s)/dur);
+      const e=t<.5?2*t*t:-1+(4-2*t)*t;
+      dispP=from+(to-from)*e;
+      priceEl.textContent='$'+Math.round(dispP).toLocaleString('en-US');
+      if(t<1) requestAnimationFrame(tick);
+    })(s);
   }
 
-  // ── Fetch ─────────────────────────────────────────────────────────────────
+  // ─── Fetch ────────────────────────────────────────────────────────────────
   async function fetchMarket() {
-    const r = await fetch(
-      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&sparkline=false'
-    );
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&sparkline=false');
+    if (!r.ok) throw r.status;
     return (await r.json())[0];
   }
 
-  async function fetchChart(range) {
-    const days = range === '12h' ? 1 : range;
-    const r = await fetch(
-      `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`
-    );
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
+  async function fetchChart(r) {
+    const days = r==='12h' ? 1 : r;
+    const res  = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`);
+    if (!res.ok) throw res.status;
+    const j = await res.json();
     let raw = j.prices;
-    if (range === '12h') {
-      const cutoff = Date.now() - 12 * 3600 * 1000;
-      raw = raw.filter(([ts]) => ts >= cutoff);
+    if (r==='12h') {
+      const cut = Date.now()-12*3600*1000;
+      raw = raw.filter(([ts])=>ts>=cut);
     }
-    const step = Math.max(1, Math.floor(raw.length / 500));
-    return raw.filter((_, i) => i % step === 0).map(([ts, price]) => ({ ts, price }));
+    const step = Math.max(1, Math.floor(raw.length/500));
+    return raw.filter((_,i)=>i%step===0).map(([ts,price])=>({ts,price}));
   }
 
-  // ── Hover ─────────────────────────────────────────────────────────────────
-  canvas.addEventListener('mousemove', e => {
-    if (!chartData.length || isIntro) return;
-    const rect = canvas.getBoundingClientRect();
-    const relX = (e.clientX - rect.left) * (C_W / rect.width);
-    const { N } = makeMap(chartData);
-    hoverI = Math.max(0, Math.min(N-1,
-      Math.round(((relX - PL) / (C_W - PL - PR)) * (N-1))
-    ));
+  // ─── Hover ────────────────────────────────────────────────────────────────
+  cv.addEventListener('mousemove', e => {
+    if (!data.length || intro || lerpLo===null) return;
+    const rct = cv.getBoundingClientRect();
+    const rx  = (e.clientX-rct.left)*(CW/rct.width);
+    const N   = data.length;
+    hoverI = Math.max(0, Math.min(N-1, Math.round(((rx-PL)/(CW-PL-PR))*(N-1))));
   });
-  canvas.addEventListener('mouseleave', () => { hoverI = null; tipEl.style.opacity = '0'; });
+  cv.addEventListener('mouseleave', ()=>{ hoverI=null; tipEl.style.opacity='0'; });
 
-  // ── Range pills ───────────────────────────────────────────────────────────
+  // ─── Range pills ──────────────────────────────────────────────────────────
   document.querySelectorAll('.rp').forEach(btn => {
     btn.addEventListener('click', async () => {
-      document.querySelectorAll('.rp').forEach(b => b.classList.remove('on'));
+      document.querySelectorAll('.rp').forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
-      currentRange = btn.dataset.d;
-      hoverI = null; animStart = null; animProg = 0; isIntro = false;
-      try {
-        chartData = await fetchChart(currentRange);
-      } catch {}
+      range=btn.dataset.r; hoverI=null; t0=null; prog=0; intro=false;
+      lerpLo=null; lerpHi=null;
+      try { data=await fetchChart(range); } catch {}
     });
   });
 
-  // ── Boot ──────────────────────────────────────────────────────────────────
+  // ─── Boot ─────────────────────────────────────────────────────────────────
   async function boot() {
     try {
       const [coin, chart] = await Promise.all([fetchMarket(), fetchChart('12h')]);
-      chartData    = chart;
-      prevRawPrice = coin.current_price;
-
-      const change = coin.price_change_percentage_24h;
-      const isUp   = change >= 0;
-      changeBadge.textContent = (isUp ? '+' : '') + change.toFixed(2) + '%';
-      changeBadge.className   = isUp ? 'up' : 'dn';
-
-      isReady = true;
+      data      = chart;
+      liveRaw   = coin.current_price;
+      const chg = coin.price_change_percentage_24h, up = chg>=0;
+      badgeEl.textContent = (up?'+':'')+chg.toFixed(2)+'%';
+      badgeEl.className   = up?'up':'dn';
+      ready = true;
 
       setInterval(async () => {
-        if (isIntro) return;
+        if (intro) return;
         try {
-          const c = await fetchMarket();
-          if (c.current_price !== prevRawPrice) {
-            prevRawPrice = c.current_price;
-            animatePrice(c.current_price);
-            const up = c.price_change_percentage_24h >= 0;
-            changeBadge.textContent = (up ? '+' : '') + c.price_change_percentage_24h.toFixed(2) + '%';
-            changeBadge.className   = up ? 'up' : 'dn';
+          const c=await fetchMarket();
+          if (c.current_price!==liveRaw) {
+            liveRaw=c.current_price; animPrice(liveRaw);
+            const u=c.price_change_percentage_24h>=0;
+            badgeEl.textContent=(u?'+':'')+c.price_change_percentage_24h.toFixed(2)+'%';
+            badgeEl.className=u?'up':'dn';
           }
         } catch {}
       }, 45000);
-    } catch (e) { console.error(e); }
+    } catch(e){ console.error(e); }
   }
 
   boot();
