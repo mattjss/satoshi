@@ -348,36 +348,6 @@
       cx.stroke(); cx.restore();
     }
 
-    // ── High / low labels (after intro completes) ────────────────────────────
-    if (p >= 1) {
-      let hiI = 0, loI = 0;
-      for (let i = 1; i < N; i++) {
-        if (px[i] > px[hiI]) hiI = i;
-        if (px[i] < px[loI]) loI = i;
-      }
-      const hiX = m.x(hiI), hiY = m.y(px[hiI]);
-      const loX = m.x(loI), loY = m.y(px[loI]);
-
-      cx.save();
-      cx.font = '9px Geist Mono,monospace';
-      cx.fillStyle = pl.lbl;
-
-      // High — above the peak
-      cx.textBaseline = 'bottom';
-      cx.textAlign    = hiI / (N-1) > 0.55 ? 'right' : 'left';
-      const hiOffX    = hiI / (N-1) > 0.55 ? -6 : 6;
-      const hiLblY    = Math.max(PT + 10, hiY - 5);
-      cx.fillText(fmtK(px[hiI]), hiX + hiOffX, hiLblY);
-
-      // Low — below the trough
-      cx.textBaseline = 'top';
-      cx.textAlign    = loI / (N-1) > 0.55 ? 'right' : 'left';
-      const loOffX    = loI / (N-1) > 0.55 ? -6 : 6;
-      const loLblY    = Math.min(CH - PB - 2, loY + 5);
-      cx.fillText(fmtK(px[loI]), loX + loOffX, loLblY);
-      cx.restore();
-    }
-
     // ── Live pulse at tip ─────────────────────────────────────────────────────
     if (!intro && p >= 1 && hoverI === null) {
       const tx = pts[pts.length-1].x, ty = pts[pts.length-1].y;
