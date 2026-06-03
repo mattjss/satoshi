@@ -26,6 +26,19 @@
       align-items: center;
     }
 
+    #meme {
+      font-size: 10px; font-weight: 300;
+      letter-spacing: 0.10em; text-transform: lowercase;
+      color: rgba(255,255,255,0.30);
+      height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      margin-bottom: 6px;
+      user-select: none;
+    }
+    body.light #meme { color: rgba(0,0,0,0.26); }
+
     #c {
       display: block;
       width: 422px;
@@ -115,6 +128,7 @@
 </head>
 <body>
   <div id="frame">
+    <div id="meme"></div>
     <canvas id="c"></canvas>
     <div id="details">
       <div id="price-row">
@@ -149,8 +163,22 @@
 
   const priceEl = document.getElementById('priceVal');
   const badgeEl = document.getElementById('changeBadge');
+  const memeEl  = document.getElementById('meme');
   const sw      = document.getElementById('sw');
   const tipEl   = document.getElementById('tip');
+
+  const BULL_MEMES = [
+    'number go up', 'have fun staying poor', 'few understand',
+    'bitcoin fixes this', '1 btc = 1 btc', 'still early',
+    'stack sats', 'orange pilled', 'wagmi', 'generational wealth',
+    'laser eyes', 'hyperbitcoinization', 'the honey badger doesn\'t care',
+  ];
+  const BEAR_MEMES = [
+    'zoom out', 'just a correction', 'diamond hands',
+    'rekt', 'buy the dip', 'probably nothing',
+    'wen moon', 'bear market building', 'this is fine', 'ngmi',
+    'have fun staying poor', 'not financial advice', 'it\'s not a loss until you sell',
+  ];
 
   // ─── Theme ────────────────────────────────────────────────────────────────
   const isLight = () => document.body.classList.contains('light');
@@ -210,6 +238,7 @@
   let scrubbing    = false;
   let liveChgTxt   = null;
   let liveChgCls   = 'up';
+  let memeShown    = false;
 
   const DUR = 4800;
 
@@ -428,6 +457,15 @@
       }
       if (!intro) liveT += dt;
 
+      // Show meme once animation is done
+      if (!intro && prog >= 1 && !memeShown && data.length > 1) {
+        memeShown = true;
+        const bull = data[data.length-1].price >= data[0].price;
+        const pool = bull ? BULL_MEMES : BEAR_MEMES;
+        memeEl.textContent = pool[Math.floor(Math.random() * pool.length)];
+        requestAnimationFrame(() => { memeEl.style.opacity = '1'; });
+      }
+
     } else if (!ready) {
       cx.clearRect(0,0,CW,CH);
     }
@@ -491,7 +529,8 @@
       document.querySelectorAll('.rp').forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
       range=btn.dataset.r; hoverI=null; t0=null; prog=0; intro=false;
-      lerpLo=null; lerpHi=null;
+      lerpLo=null; lerpHi=null; memeShown=false;
+      memeEl.style.opacity = '0';
       try { data=await fetchChart(range); } catch {}
     });
   });
