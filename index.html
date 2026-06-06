@@ -174,38 +174,50 @@
     'still early',
     'bitcoin fixes this',
     '1 btc = 1 btc',
-    'laser eyes',
+    'laser eyes activated',
     'generational wealth',
-    'hodl',
-    'up only',
+    'hodl the line',
+    'up only, ser',
     '21 million. never more.',
-    'stack sats',
-    'gm',
+    'stack sats, ignore fiat',
+    'gm to the gainers',
     'we\'re all gonna make it',
     'ngmi if you sold',
-    'the honey badger doesn\'t care',
-    'orange pilled',
-    'to the moon',
+    'honey badger don\'t care',
+    'orange pilled and thriving',
+    'to the moon and beyond',
+    'financial freedom loading…',
+    'your bank is ngmi',
+    'the halvening was not priced in',
+    'this is the way',
+    'have fun staying poor, respectfully',
+    'the fed is a meme. btc is not.',
   ];
   const BEAR_MEMES = [
-    'zoom out',
-    'this is fine',
-    'rekt',
-    'buy the dip',
-    'just a correction',
-    'diamond hands',
-    'wen moon',
+    'zoom out, coward',
+    'this is fine 🔥',
+    'absolutely rekt',
+    'buy the dip (and the dip\'s dip)',
+    'just a healthy correction bro',
+    'diamond hands, paper heart',
+    'wen moon ser',
     'probably nothing',
-    'ngmi',
-    'paper hands',
-    'it\'s not a loss until you sell',
-    'bear market building',
-    'down bad',
+    'ngmi and you know it',
+    'paper hands detected',
+    'not a loss until you sell (cope)',
+    'bear market, but make it fashion',
+    'down bad. very down. much bad.',
     'ser this is a wendy\'s',
-    'the dip dipped',
-    'liquidated',
-    'touch grass',
-    'gm (it\'s not)',
+    'the dip dipped and dipped again',
+    'liquidated. thoughts and prayers.',
+    'maybe touch grass today',
+    'gm. it\'s not.',
+    'satoshi would be disappointed',
+    'you could\'ve bought at $1',
+    'the line went the wrong way',
+    'crypto twitter is unwell',
+    'it\'s called a consolidation phase',
+    'delete the app. go outside.',
   ];
 
   // ─── Theme ────────────────────────────────────────────────────────────────
@@ -307,11 +319,18 @@
   function map() {
     const pW = CW - PL - PR, pH = CH - PT - PB;
     const N  = data.length;
+    const useLog = range === 'max';
+    const safeFloor = 0.001;
+    const logLo = Math.log10(Math.max(safeFloor, lerpLo));
+    const logHi = Math.log10(Math.max(safeFloor, lerpHi));
+    const logSp = (logHi - logLo) || 1;
     const sp = (lerpHi - lerpLo) || 1;
     return {
       N,
       x: i  => PL + (i / (N-1)) * pW,
-      y: pr => PT + pH * (1 - (pr - lerpLo) / sp),
+      y: pr => useLog
+        ? PT + pH * (1 - (Math.log10(Math.max(safeFloor, pr)) - logLo) / logSp)
+        : PT + pH * (1 - (pr - lerpLo) / sp),
     };
   }
 
@@ -330,6 +349,7 @@
       const h=d.getHours(), mn=d.getMinutes().toString().padStart(2,'0');
       return (h%12||12)+':'+mn+(h<12?' am':' pm');
     }
+    if (diff > 365*86400000) return MO[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
     return MO[d.getMonth()]+' '+d.getDate();
   }
   function fmtK(v) {
@@ -525,7 +545,8 @@
 
   async function fetchChart(r) {
     const days = r==='12h' ? 1 : r;
-    const res  = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`);
+    const interval = r==='max' ? '&interval=daily' : '';
+    const res  = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}${interval}`);
     if (!res.ok) throw res.status;
     const j = await res.json();
     let raw = j.prices;
