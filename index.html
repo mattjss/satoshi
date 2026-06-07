@@ -145,7 +145,7 @@
         <button class="rp" data-r="max">All</button>
       </div>
       <div id="controls-row">
-        <label class="toggle"><input type="checkbox" id="sw"><span class="knob"></span></label>
+        <label class="toggle" id="toggle-label"><input type="checkbox" id="sw"><span class="knob"></span></label>
       </div>
     </div>
   </div>
@@ -166,6 +166,8 @@
   const memeEl  = document.getElementById('meme');
   const sw      = document.getElementById('sw');
   const tipEl   = document.getElementById('tip');
+  const isEmbed = new URLSearchParams(location.search).has('embed');
+  if (isEmbed) document.getElementById('toggle-label').style.display = 'none';
 
   const BULL_MEMES = [
     'number go up',
