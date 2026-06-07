@@ -232,6 +232,15 @@
     redraw();
   });
 
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') {
+      const light = e.data.theme === 'light';
+      document.body.classList.toggle('light', light);
+      sw.checked = light;
+      redraw();
+    }
+  });
+
   // ─── Palette — green=bull (happy), red=bear (sad) ─────────────────────────
   function pal() {
     const L = isLight();
