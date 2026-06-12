@@ -600,7 +600,7 @@
 
   // ─── Fetch ────────────────────────────────────────────────────────────────
   async function fetchPrice() {
-    const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+    const res = await fetch('https://api.binance.us/api/v3/ticker/price?symbol=BTCUSDT');
     if (!res.ok) throw res.status;
     return parseFloat((await res.json()).price);
   }
@@ -616,7 +616,7 @@
       'max': { interval: '1w',  limit: 300 },
     };
     const { interval, limit } = cfg[r] || cfg['1'];
-    const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`);
+    const res = await fetch(`https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`);
     if (!res.ok) throw res.status;
     return (await res.json()).map(k => ({ ts: k[0], price: parseFloat(k[4]) }));
   }
