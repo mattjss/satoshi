@@ -95,8 +95,7 @@
     body.light .rp.on    { color: rgba(0,0,0,0.68); border-color: rgba(0,0,0,0.10); background: rgba(0,0,0,0.04); }
 
     /* ── Toggle ── */
-    #controls-row { display: flex; justify-content: center; }
-    .toggle { position: relative; display: inline-block; width: 26px; height: 14px; cursor: pointer; }
+    .toggle { position: fixed; bottom: 24px; right: 24px; display: inline-block; width: 26px; height: 14px; cursor: pointer; }
     .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
     .knob {
       position: absolute; inset: 0; border-radius: 7px;
@@ -144,12 +143,10 @@
         <button class="rp" data-r="365">1Y</button>
         <button class="rp" data-r="max">All</button>
       </div>
-      <div id="controls-row">
-        <label class="toggle" id="toggle-label"><input type="checkbox" id="sw"><span class="knob"></span></label>
-      </div>
     </div>
   </div>
   <div id="tip"></div>
+  <label class="toggle" id="toggle-label"><input type="checkbox" id="sw"><span class="knob"></span></label>
 
 <script>
   // ─── Canvas init ──────────────────────────────────────────────────────────
