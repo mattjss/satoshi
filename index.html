@@ -299,7 +299,6 @@
   let audioMuted = false;
   let prevHoverIForTick = null;
   let lastTickTime = 0;
-  let introAnimSoundPlayed = false;
 
   function ac() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -342,29 +341,6 @@
     } catch(e) {}
   }
 
-  function playIntroWhoosh() {
-    if (audioMuted || introAnimSoundPlayed) return;
-    introAnimSoundPlayed = true;
-    try {
-      const ctx = ac(), t = ctx.currentTime;
-      const len = Math.ceil(ctx.sampleRate * 1.6);
-      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-      const ch  = buf.getChannelData(0);
-      for (let i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1;
-      const src = ctx.createBufferSource(); src.buffer = buf;
-      const flt = ctx.createBiquadFilter();
-      flt.type = 'bandpass'; flt.Q.value = 0.7;
-      flt.frequency.setValueAtTime(280, t);
-      flt.frequency.exponentialRampToValueAtTime(2200, t + 1.2);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.055, t + 0.18);
-      g.gain.linearRampToValueAtTime(0.055, t + 1.0);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 1.6);
-      src.connect(flt); flt.connect(g); g.connect(ctx.destination);
-      src.start(t); src.stop(t + 1.65);
-    } catch(e) {}
-  }
 
   const DUR = 4800;
 
@@ -651,7 +627,6 @@
     const rx  = (e.clientX-rct.left)*(CW/rct.width);
     const N   = data.length;
     hoverI = Math.max(0, Math.min(N-1, Math.round(((rx-PL)/(CW-PL-PR))*(N-1))));
-    if (!introAnimSoundPlayed && t0 !== null && prog < 1) playIntroWhoosh();
     if (hoverI !== prevHoverIForTick) {
       prevHoverIForTick = hoverI;
       playTick(500 + (hoverI / ((N - 1) || 1)) * 500);
@@ -669,7 +644,6 @@
       document.querySelectorAll('.rp').forEach(b=>b.classList.remove('on'));
       btn.classList.add('on');
       playSelect();
-      introAnimSoundPlayed = false;
       range=btn.dataset.r; hoverI=null; t0=null; prog=0; intro=false;
       lerpLo=null; lerpHi=null; memeShown=false;
       memeEl.style.opacity = '0';
