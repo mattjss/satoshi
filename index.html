@@ -599,25 +599,35 @@
   }
 
   // ─── Fetch ────────────────────────────────────────────────────────────────
-  async function fetchMarket() {
-    const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&sparkline=false');
-    if (!r.ok) throw r.status;
-    return (await r.json())[0];
+  async function fetchPrice() {
+    const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+    if (!res.ok) throw res.status;
+    return parseFloat((await res.json()).price);
   }
 
   async function fetchChart(r) {
-    const days = r==='12h' ? 1 : r;
-    const interval = r==='max' ? '&interval=daily' : '';
-    const res  = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}${interval}`);
+    const cfg = {
+      '12h': { interval: '5m',  limit: 144 },
+      '1':   { interval: '5m',  limit: 288 },
+      '7':   { interval: '1h',  limit: 168 },
+      '30':  { interval: '4h',  limit: 180 },
+      '90':  { interval: '8h',  limit: 270 },
+      '365': { interval: '1d',  limit: 365 },
+      'max': { interval: '1w',  limit: 300 },
+    };
+    const { interval, limit } = cfg[r] || cfg['1'];
+    const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`);
     if (!res.ok) throw res.status;
-    const j = await res.json();
-    let raw = j.prices;
-    if (r==='12h') {
-      const cut = Date.now()-12*3600*1000;
-      raw = raw.filter(([ts])=>ts>=cut);
-    }
-    const step = Math.max(1, Math.floor(raw.length/500));
-    return raw.filter((_,i)=>i%step===0).map(([ts,price])=>({ts,price}));
+    return (await res.json()).map(k => ({ ts: k[0], price: parseFloat(k[4]) }));
+  }
+
+  function calcChange() {
+    if (data.length < 2) return;
+    const first = data[0].price, last = data[data.length - 1].price;
+    const pct = ((last - first) / first) * 100;
+    const up  = pct >= 0;
+    badgeEl.textContent = (up ? '+' : '') + pct.toFixed(2) + '%';
+    badgeEl.className   = up ? 'up' : 'dn';
   }
 
   // ─── Hover ────────────────────────────────────────────────────────────────
@@ -647,39 +657,30 @@
       range=btn.dataset.r; hoverI=null; t0=null; prog=0; intro=false;
       lerpLo=null; lerpHi=null; memeShown=false;
       memeEl.style.opacity = '0';
-      try { data=await fetchChart(range); } catch {}
+      try {
+        data = await fetchChart(range);
+        calcChange();
+        animPrice(liveRaw);
+      } catch {}
     });
   });
 
   // ─── Boot ─────────────────────────────────────────────────────────────────
   async function boot() {
     try {
-      const [coin, chart] = await Promise.all([fetchMarket(), fetchChart('12h')]);
+      const [price, chart] = await Promise.all([fetchPrice(), fetchChart('12h')]);
       data    = chart;
-      liveRaw = coin.current_price;
-
-      const chg = coin.price_change_percentage_24h, up = chg>=0;
-      liveChgTxt = (up?'+':'') + chg.toFixed(2) + '%';
-      liveChgCls = up ? 'up' : 'dn';
-      badgeEl.textContent = liveChgTxt;
-      badgeEl.className   = liveChgCls;
+      liveRaw = price;
+      calcChange();
       ready = true;
 
       setInterval(async () => {
         if (intro || scrubbing) return;
         try {
-          const c = await fetchMarket();
-          if (c.current_price !== liveRaw) {
-            liveRaw = c.current_price;
-            animPrice(liveRaw);
-            const u = c.price_change_percentage_24h >= 0;
-            liveChgTxt = (u?'+':'') + c.price_change_percentage_24h.toFixed(2) + '%';
-            liveChgCls = u ? 'up' : 'dn';
-            badgeEl.textContent = liveChgTxt;
-            badgeEl.className   = liveChgCls;
-          }
+          const p = await fetchPrice();
+          if (p !== liveRaw) { liveRaw = p; animPrice(p); }
         } catch {}
-      }, 45000);
+      }, 30000);
     } catch(e){ console.error(e); }
   }
 
